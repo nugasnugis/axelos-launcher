@@ -11,7 +11,7 @@ export default async function handler(req, res) {
     const repo = "axtest-Web";
 
     // 1. Ask GitHub's API directly for real-time runner status (Bypasses all cache bugs)
-    const githubStatusUrl = `https://api.github.com/repos/{owner}/{repo}/actions/runs?status=in_progress&per_page=1`;
+    const githubStatusUrl = `https://api.github.com/repos/${owner}/${repo}/actions/runs?status=in_progress&per_page=1`;
     const workflowCheck = await fetch(githubStatusUrl, {
       headers: {
         'Authorization': `token ${process.env.GH_PAT}`,
@@ -32,7 +32,7 @@ export default async function handler(req, res) {
     }
 
     // 3. If zero runners are spinning, press the physical power switch
-    const launchResponse = await fetch(`https://api.github.com/repos/{owner}/{repo}/dispatches`, {
+    const launchResponse = await fetch(`https://api.github.com/repos/${owner}/${repo}/dispatches`, {
       method: 'POST',
       headers: {
         'Authorization': `token ${process.env.GH_PAT}`,
