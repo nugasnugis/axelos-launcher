@@ -14,7 +14,7 @@ export default async function handler(req, res) {
     const githubStatusUrl = `https://api.github.com/repos/{owner}/{repo}/actions/runs?status=in_progress&per_page=1`;
     const workflowCheck = await fetch(githubStatusUrl, {
       headers: {
-        'Authorization': `token ${process.env.GH_PAT.trim()}`,
+        'Authorization': `token ${process.env.GH_PAT}`,
         'User-Agent': 'DistroSea-Queue-Engine',
         'Accept': 'application.vnd.github+json'
       }
@@ -35,7 +35,7 @@ export default async function handler(req, res) {
     const launchResponse = await fetch(`https://api.github.com/repos/{owner}/{repo}/dispatches`, {
       method: 'POST',
       headers: {
-        'Authorization': `token ${process.env.GH_PAT.trim()}`,
+        'Authorization': `token ${process.env.GH_PAT}`,
         'Accept': 'application.vnd.github.v3+json',
         'X-GitHub-Api-Version': '2022-11-28',
         'User-Agent': 'AxelOS-Vercel-Proxy'
