@@ -1,0 +1,8 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/api/launch", "dest": "api/launch.js" },
+    { "src": "/api/status", "dest": "api/status.js" },
+    { "src": "/(.*)", "dest": "/$1" }
+  ]
+}
