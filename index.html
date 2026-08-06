@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DistroSea - Test AxelOS Online</title>
+    <style>
+        :root { 
+            --bg: #060814; 
+            --panel: #0b112c; 
+            --accent: #3b82f6; 
+            --accent-hover: #1d4ed8; 
+            --text: #f8fafc; 
+            --text-muted: #64748b; 
+            --border: #1e293b; 
+            --terminal-bg: #02040a; 
+        }
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: var(--bg); 
+            color: var(--text); 
+            display: flex; 
+            flex-direction: column; 
+            min-height: 100vh; 
+            margin: 0; 
+            overflow-x: hidden; 
+        }
+        header { 
+            background: rgba(11, 17, 44, 0.8); 
+            backdrop-filter: blur(12px); 
+            border-bottom: 1px solid var(--border); 
+            padding: 15px 40px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            position: sticky; 
+            top: 0; 
+            z-index: 50; 
+        }
+        .logo { 
+            font-size: 20px; 
+            font-weight: 800; 
+            letter-spacing: -0.5px; 
+            color: #fff; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+        .logo span { color: var(--accent); }
+        .nav-links { font-size: 14px; color: var(--text-muted); font-weight: 500; }
+        main { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            padding: 40px 20px; 
+            position: relative; 
+        }
+        .card { 
+            background: var(--panel); 
+            width: 100%; 
+            max-width: 500px; 
+            padding: 40px; 
+            border-radius: 16px; 
+            border: 1px solid var(--border); 
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); 
+            text-align: center; 
+            position: relative; 
+            z-index: 10; 
+        }
+        h1 { font-size: 28px; font-weight: 700; margin: 0 0 10px 0; letter-spacing: -0.5px; color: #fff; }
+        .subtitle { color: var(--text-muted); font-size: 14px; margin: 0 0 30px 0; line-height: 1.6; }
+        .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
+        .spec-badge { background: rgba(2,4,10,0.4); border: 1px solid var(--border); padding: 10px; border-radius: 8px; font-size: 12px; }
+        .spec-badge div:first-child { color: var(--text-muted); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; }
+        .spec-badge div:last-child { font-weight: 600; color: #fff; }
+        .btn { 
+            background: var(--accent); 
+            color: white; 
+            border: none; 
+            width: 100%; 
+            padding: 16px; 
+            font-size: 16px; 
+            font-weight: 600; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); 
+        }
+        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
+        .btn:active { transform: translateY(1px); }
+        .btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; box-shadow: none; transform: none; }
+        #terminal-box { 
+            display: none; 
+            margin-top: 25px; 
+            background: var(--terminal-bg); 
+            border-radius: 8px; 
+            border: 1px solid var(--border); 
+            padding: 16px; 
+            text-align: left; 
+            font-family: 'SFMono-Regular', Consolas, monospace; 
+            font-size: 12px; 
+            color: #38bdf8; 
+            line-height: 1.6; 
+            max-height: 120px; 
+            overflow-y: hidden; 
+            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8); 
+        }
+        .cursor { display: inline-block; width: 6px; height: 14px; background: #38bdf8; margin-left: 4px; animation: blink 0.8s infinite; vertical-align: middle; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 4, 10, 0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 100; }
+        .modal-box { background: var(--panel); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.8); animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-box h3 { margin: 0 0 12px 0; font-size: 22px; color: #fff; font-weight: 700; }
+        .modal-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.5; }
+        .timer-strip { font-size: 32px; font-weight: 800; color: #ef4444; font-family: monospace; margin-bottom: 25px; }
+        .confirm-btn { background: #10b981; color: white; border: none; width: 100%; padding: 14px; font-weight: 600; font-size: 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
+        .confirm-btn:hover { background: #059669; }
+        .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; }
+        footer { border-top: 1px solid var(--border); text-align: center; padding: 20px; font-size: 12px; color: var(--text-muted); background: rgba(6,8,20,0.5); }
+        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
+        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Distro<span>Sea</span></div>
+    <div class="nav-links">Active Cluster Infrastructure</div>
+</header>
+
+<main>
+    <div class="bg-glow"></div>
+    <div class="card">
+        <h1>AxelOS Custom</h1>
+        <p class="subtitle">Launch a native x86_64 Debian Live CD environment featuring the full KDE Plasma desktop directly in a secure container tab.</p>
+        
+        <div class="specs-grid">
+            <div class="spec-badge"><div>Arch</div><div>x86_64</div></div>
+            <div class="spec-badge"><div>Memory</div><div>5.0 GB</div></div>
+            <div class="spec-badge"><div>CPU Cores</div><div>2 vCPUs</div></div>
+        </div>
+
+        <button id="launch-btn" class="btn" onclick="triggerDistroSeaPipeline()">Start AxelOS</button>
+        
+        <div id="terminal-box">
+            <div id="log-line-1">> Initializing operational queue...</div>
+            <div id="log-line-2"></div>
+            <div id="log-line-3"></div>
+            <span class="cursor"></span>
+        </div>
+    </div>
+</main>
+
+<footer>
+    &copy; 2026 DistroSea Engine Infrastructure Sandbox Simulation Shell Layers.
+</footer>
+
+<div id="verify-modal" class="modal">
+    <div class="modal-box">
+        <h3>Your VM Server is Ready!</h3>
+        <p>The hypervisor node has finalized booting up AxelOS. Confirm your access authorization within the allocation time window to mount the system interface panel.</p>
+        <div class="timer-strip" id="countdown-clock">30</div>
+        <button class="confirm-btn" id="claim-btn">Enter Desktop Terminal</button>
+    </div>
+</div>
+
+<script>
+    let streamTracker = null;
+    let gateTimerWatcher = null;
+
+    async function triggerDistroSeaPipeline() {
+        const btn = document.getElementById('launch-btn');
+        const term = document.getElementById('terminal-box');
+        const l2 = document.getElementById('log-line-2');
+        const l3 = document.getElementById('log-line-3');
+
+        btn.disabled = true;
+        term.style.display = "block";
+        l2.innerText = "> Requesting structural resource mapping allocations...";
+
+        try {
+            const check = await fetch('/api/status');
+            const state = await check.json();
+
+            if (state.status === "ready" && state.url) {
+                l2.innerText = "> Found active execution path container slot.";
+                l3.innerText = "> Launching confirmation gateway panel elements...";
+                launchVerificationGate(state.url);
+                return;
+            }
+
+            l2.innerText = "> Queue Position: 1. Provisioning bare-metal hardware cluster context...";
+            const dispatch = await fetch('/api/launch', { method: 'POST' });
+            const verification = await dispatch.json();
+
+            if (!verification.success) throw new Error("API rejection execution exception");
+
+            let systemTickCounter = 0;
+            streamTracker = setInterval(async () => {
+                systemTickCounter++;
+                l2.innerText = `> Cloud Infrastructure Bootstrapping Processing... (${systemTickCounter * 5}s)`;
+                l3.innerText = `> Pulling 8GB axelos-amd64.iso pipeline stream data layers...`;
+                
+                const poll = await fetch('/api/status');
+                const telemetry = await poll.json();
+                
+                if (telemetry.status === "ready" && telemetry.url) {
+                    clearInterval(streamTracker);
+                    l2.innerText = "> ISO downloaded. Kernel boot cycles completed.";
+                    l3.innerText = "> Display server initialization confirmed. Node mapping synchronized.";
+                    setTimeout(() => { launchVerificationGate(telemetry.url); }, 1000);
+                }
+            }, 5000);
+
+        } catch (err) {
+            l2.style.color = "#ef4444";
+            l2.innerText = "> FATAL NETWORK LANE INFRASTRUCTURE CORRUPTION EXCEPTION.";
+            btn.disabled = false;
+        }
+    }
+
+    function launchVerificationGate(directStreamingTargetUrl) {
+        const modal = document.getElementById('verify-modal');
+        const clock = document.getElementById('countdown-clock');
+        const confirmBtn = document.getElementById('claim-btn');
+        const btn = document.getElementById('launch-btn');
+        const term = document.getElementById('terminal-box');
+
+        modal.style.display = "flex";
+        let secondsLeft = 30;
+        clock.innerText = secondsLeft;
+
+        gateTimerWatcher = setInterval(() => {
+            secondsLeft--;
+            clock.innerText = secondsLeft;
+            if (secondsLeft <= 0) {
+                clearInterval(gateTimerWatcher);
+                modal.style.display = "none";
+                term.style.display = "none";
+                btn.disabled = false;
+                alert("Verification threshold timeout limit expired. Cloud slot reclaimed.");
+            }
+        }, 1000);
+
+        confirmBtn.onclick = () => {
+            clearInterval(gateTimerWatcher);
+            modal.style.display = "none";
+            term.style.display = "none";
+            btn.disabled = false;
+            window.open(directStreamingTargetUrl, '_blank');
+        };
+    }
+</script>
+
+</body>
+</html>
