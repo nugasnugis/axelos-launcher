@@ -175,45 +175,58 @@
 
         btn.disabled = true;
         term.style.display = "block";
-        l2.innerText = "> Requesting structural resource mapping allocations...";
+        l2.innerText = "> Interrogating current active cluster node locks...";
 
         try {
+            // 1. Check if a VM session is ALREADY running
             const check = await fetch('/api/status');
             const state = await check.json();
 
             if (state.status === "ready" && state.url) {
-                l2.innerText = "> Found active execution path container slot.";
-                l3.innerText = "> Launching confirmation gateway panel elements...";
+                l2.innerText = "> Active hot-standby runtime asset identified.";
+                l3.innerText = "> Launching user validation check sequence loops...";
                 launchVerificationGate(state.url);
                 return;
             }
 
+            // 2. If it is offline, launch a NEW virtual machine
             l2.innerText = "> Queue Position: 1. Provisioning bare-metal hardware cluster context...";
+            l3.innerText = "> Sending wake-up signal to GitHub runners...";
+            
             const dispatch = await fetch('/api/launch', { method: 'POST' });
             const verification = await dispatch.json();
 
-            if (!verification.success) throw new Error("API rejection execution exception");
+            if (!verification.success) {
+                throw new Error("API rejection execution exception");
+            }
 
+            // 3. Start checking session.json every 5 seconds until the VM is ready
             let systemTickCounter = 0;
             streamTracker = setInterval(async () => {
                 systemTickCounter++;
                 l2.innerText = `> Cloud Infrastructure Bootstrapping Processing... (${systemTickCounter * 5}s)`;
                 l3.innerText = `> Pulling 8GB axelos-amd64.iso pipeline stream data layers...`;
                 
-                const poll = await fetch('/api/status');
-                const telemetry = await poll.json();
-                
-                if (telemetry.status === "ready" && telemetry.url) {
-                    clearInterval(streamTracker);
-                    l2.innerText = "> ISO downloaded. Kernel boot cycles completed.";
-                    l3.innerText = "> Display server initialization confirmed. Node mapping synchronized.";
-                    setTimeout(() => { launchVerificationGate(telemetry.url); }, 1000);
+                try {
+                    const poll = await fetch('/api/status');
+                    const telemetry = await poll.json();
+                    
+                    if (telemetry.status === "ready" && telemetry.url) {
+                        clearInterval(streamTracker);
+                        l2.innerText = "> ISO downloaded. Kernel boot cycles completed.";
+                        l3.innerText = "> Display server initialization confirmed. Node mapping synchronized.";
+                        setTimeout(() => { launchVerificationGate(telemetry.url); }, 1000);
+                    }
+                } catch (pollErr) {
+                    // Ignore transient CDN fetching errors while GitHub Pages updates
+                    console.log("Waiting for CDN update...");
                 }
             }, 5000);
 
         } catch (err) {
             l2.style.color = "#ef4444";
-            l2.innerText = "> FATAL NETWORK LANE INFRASTRUCTURE CORRUPTION EXCEPTION.";
+            l2.innerText = "> FATAL INITIALIZATION LANE EXCEPTION.";
+            l3.innerText = "> Trigger failed. Verify your Vercel GH_PAT variable matches your GitHub token.";
             btn.disabled = false;
         }
     }
@@ -250,6 +263,7 @@
         };
     }
 </script>
+
 
 </body>
 </html>
