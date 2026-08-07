@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
     // 2. HARD LOCK TRAFFIC RULE: If a runner is already spinning up or active, block the trigger
     if (runData.workflow_runs && runData.workflow_runs.length > 0) {
-      return res.status(429).json({ 
+      return res.status(200).json({ 
         success: false, 
         queueLocked: true,
         error: "Server occupied. Added to queue pool." 
