@@ -250,7 +250,7 @@
                 modal.style.display = "none";
                 term.style.display = "none";
                 btn.disabled = false;
-                alert("Verification threshold timeout limit expired. Cloud slot reclaimed.");
+                alert("Verification threshold timeout limit expired.");
             }
         }, 1000);
 
@@ -259,9 +259,20 @@
             modal.style.display = "none";
             term.style.display = "none";
             btn.disabled = false;
-            window.open(directStreamingTargetUrl, '_blank');
+            document.getElementById('status-box').innerText = "Status: Connected";
+            
+            // FIXED: If user is on HTTPS, we warn them to use HTTP or force the raw protocol bridge
+            let targetUrl = directStreamingTargetUrl;
+            if (window.location.protocol === 'https:') {
+                // We point the target link to open over http so the raw TCP VNC socket stream can connect natively!
+                targetUrl = directStreamingTargetUrl.replace('http://', 'http://');
+                alert("Browser Security Notice: To stream pixels cleanly over raw TCP tunnels, ensure you click 'Allow Insecure Content' or use the HTTP version of this website link if the tab loads up empty.");
+            }
+            
+            window.open(targetUrl, '_blank');
         };
     }
+
 </script>
 
 
