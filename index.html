@@ -2,279 +2,776 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DistroSea - Test AxelOS Online</title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#050811"
+    >
+
+    <title>AxelOS Cloud Desktop</title>
+
     <style>
-        :root { 
-            --bg: #060814; 
-            --panel: #0b112c; 
-            --accent: #3b82f6; 
-            --accent-hover: #1d4ed8; 
-            --text: #f8fafc; 
-            --text-muted: #64748b; 
-            --border: #1e293b; 
-            --terminal-bg: #02040a; 
+        :root {
+            --bg: #050811;
+            --panel: rgba(10, 16, 30, .82);
+            --panel-2: #0b1220;
+
+            --blue: #4f8cff;
+            --cyan: #38d9ff;
+            --purple: #765cff;
+            --green: #3ee58a;
+            --orange: #ffb454;
+            --red: #ff5d6c;
+
+            --text: #f5f8ff;
+            --muted: #8492aa;
+
+            --border: rgba(133, 163, 219, .15);
         }
-        body { 
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
-            background: var(--bg); 
-            color: var(--text); 
-            display: flex; 
-            flex-direction: column; 
-            min-height: 100vh; 
-            margin: 0; 
-            overflow-x: hidden; 
+
+        * {
+            box-sizing: border-box;
         }
-        header { 
-            background: rgba(11, 17, 44, 0.8); 
-            backdrop-filter: blur(12px); 
-            border-bottom: 1px solid var(--border); 
-            padding: 15px 40px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            position: sticky; 
-            top: 0; 
-            z-index: 50; 
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            overflow: hidden;
+
+            color: var(--text);
+
+            font-family:
+                Inter,
+                ui-sans-serif,
+                system-ui,
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                sans-serif;
+
+            background:
+                radial-gradient(
+                    circle at 50% -10%,
+                    rgba(79,140,255,.20),
+                    transparent 42%
+                ),
+                radial-gradient(
+                    circle at 100% 100%,
+                    rgba(118,92,255,.12),
+                    transparent 38%
+                ),
+                var(--bg);
         }
-        .logo { 
-            font-size: 20px; 
-            font-weight: 800; 
-            letter-spacing: -0.5px; 
-            color: #fff; 
-            display: flex; 
-            align-items: center; 
-            gap: 8px; 
+
+        body::before {
+            content: "";
+
+            position: fixed;
+            inset: 0;
+
+            pointer-events: none;
+
+            opacity: .18;
+
+            background-image:
+                linear-gradient(
+                    rgba(255,255,255,.025) 1px,
+                    transparent 1px
+                ),
+                linear-gradient(
+                    90deg,
+                    rgba(255,255,255,.025) 1px,
+                    transparent 1px
+                );
+
+            background-size: 42px 42px;
         }
-        .logo span { color: var(--accent); }
-        .nav-links { font-size: 14px; color: var(--text-muted); font-weight: 500; }
-        main { 
-            flex: 1; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 40px 20px; 
-            position: relative; 
+
+        .shell {
+            width: min(92vw, 520px);
+
+            position: relative;
+
+            padding: 34px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 24px;
+
+            background:
+                linear-gradient(
+                    145deg,
+                    rgba(13,22,40,.92),
+                    rgba(7,11,21,.88)
+                );
+
+            box-shadow:
+                0 40px 100px rgba(0,0,0,.55),
+                0 0 80px rgba(79,140,255,.06);
+
+            backdrop-filter: blur(24px);
         }
-        .card { 
-            background: var(--panel); 
-            width: 100%; 
-            max-width: 500px; 
-            padding: 40px; 
-            border-radius: 16px; 
-            border: 1px solid var(--border); 
-            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); 
-            text-align: center; 
-            position: relative; 
-            z-index: 10; 
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 13px;
+
+            margin-bottom: 32px;
         }
-        h1 { font-size: 28px; font-weight: 700; margin: 0 0 10px 0; letter-spacing: -0.5px; color: #fff; }
-        .subtitle { color: var(--text-muted); font-size: 14px; margin: 0 0 30px 0; line-height: 1.6; }
-        .specs-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 30px; }
-        .spec-badge { background: rgba(2,4,10,0.4); border: 1px solid var(--border); padding: 10px; border-radius: 8px; font-size: 12px; }
-        .spec-badge div:first-child { color: var(--text-muted); margin-bottom: 4px; font-size: 11px; text-transform: uppercase; }
-        .spec-badge div:last-child { font-weight: 600; color: #fff; }
-        .btn { 
-            background: var(--accent); 
-            color: white; 
-            border: none; 
-            width: 100%; 
-            padding: 16px; 
-            font-size: 16px; 
-            font-weight: 600; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: all 0.2s; 
-            box-shadow: 0 4px 14px rgba(59, 130, 246, 0.4); 
+
+        .logo {
+            width: 45px;
+            height: 45px;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            border-radius: 13px;
+
+            color: white;
+
+            font-weight: 950;
+            font-size: 14px;
+            letter-spacing: 1px;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--blue),
+                    var(--purple)
+                );
+
+            box-shadow:
+                0 0 30px
+                rgba(79,140,255,.30);
         }
-        .btn:hover { background: var(--accent-hover); transform: translateY(-1px); }
-        .btn:active { transform: translateY(1px); }
-        .btn:disabled { background: #1e293b; color: #475569; cursor: not-allowed; box-shadow: none; transform: none; }
-        #terminal-box { 
-            display: none; 
-            margin-top: 25px; 
-            background: var(--terminal-bg); 
-            border-radius: 8px; 
-            border: 1px solid var(--border); 
-            padding: 16px; 
-            text-align: left; 
-            font-family: 'SFMono-Regular', Consolas, monospace; 
-            font-size: 12px; 
-            color: #38bdf8; 
-            line-height: 1.6; 
-            max-height: 120px; 
-            overflow-y: hidden; 
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.8); 
+
+        .brand-name {
+            font-size: 16px;
+            font-weight: 900;
+            letter-spacing: 4px;
         }
-        .cursor { display: inline-block; width: 6px; height: 14px; background: #38bdf8; margin-left: 4px; animation: blink 0.8s infinite; vertical-align: middle; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(2, 4, 10, 0.85); backdrop-filter: blur(8px); align-items: center; justify-content: center; z-index: 100; }
-        .modal-box { background: var(--panel); padding: 40px; border-radius: 16px; border: 1px solid var(--border); max-width: 400px; width: 90%; text-align: center; box-shadow: 0 25px 50px rgba(0,0,0,0.8); animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-        .modal-box h3 { margin: 0 0 12px 0; font-size: 22px; color: #fff; font-weight: 700; }
-        .modal-box p { font-size: 14px; color: var(--text-muted); margin-bottom: 30px; line-height: 1.5; }
-        .timer-strip { font-size: 32px; font-weight: 800; color: #ef4444; font-family: monospace; margin-bottom: 25px; }
-        .confirm-btn { background: #10b981; color: white; border: none; width: 100%; padding: 14px; font-weight: 600; font-size: 16px; border-radius: 8px; cursor: pointer; transition: background 0.2s; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3); }
-        .confirm-btn:hover { background: #059669; }
-        .bg-glow { position: absolute; width: 600px; height: 600px; background: radial-gradient(circle, rgba(59,130,246,0.08) 0%, rgba(0,0,0,0) 70%); top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1; pointer-events: none; }
-        footer { border-top: 1px solid var(--border); text-align: center; padding: 20px; font-size: 12px; color: var(--text-muted); background: rgba(6,8,20,0.5); }
-        @keyframes blink { 0%, 100% { opacity: 0; } 50% { opacity: 1; } }
-        @keyframes scaleUp { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+        .brand-subtitle {
+            margin-top: 3px;
+
+            color: var(--cyan);
+
+            font-size: 8px;
+            font-weight: 800;
+
+            letter-spacing: 3px;
+        }
+
+        h1 {
+            margin: 0 0 10px;
+
+            font-size: 30px;
+            letter-spacing: -1px;
+        }
+
+        .description {
+            margin: 0 0 28px;
+
+            color: var(--muted);
+
+            font-size: 14px;
+            line-height: 1.65;
+        }
+
+        .specs {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+
+            gap: 9px;
+
+            margin-bottom: 24px;
+        }
+
+        .spec {
+            padding: 12px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(255,255,255,.025);
+        }
+
+        .spec-label {
+            color: var(--muted);
+
+            font-size: 8px;
+            font-weight: 800;
+
+            letter-spacing: 1.4px;
+            text-transform: uppercase;
+        }
+
+        .spec-value {
+            margin-top: 5px;
+
+            font-size: 13px;
+            font-weight: 800;
+        }
+
+        button {
+            width: 100%;
+
+            border: 0;
+
+            padding: 15px;
+
+            border-radius: 12px;
+
+            color: white;
+
+            font-size: 14px;
+            font-weight: 800;
+
+            cursor: pointer;
+
+            background:
+                linear-gradient(
+                    135deg,
+                    var(--blue),
+                    var(--purple)
+                );
+
+            box-shadow:
+                0 12px 30px
+                rgba(79,140,255,.20);
+
+            transition:
+                transform .2s,
+                filter .2s;
+        }
+
+        button:hover {
+            filter: brightness(1.1);
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            cursor: wait;
+            opacity: .55;
+            transform: none;
+        }
+
+        .status {
+            margin-top: 18px;
+
+            min-height: 48px;
+
+            display: flex;
+            align-items: center;
+
+            padding: 12px 14px;
+
+            border:
+                1px solid var(--border);
+
+            border-radius: 12px;
+
+            background:
+                rgba(2,5,12,.72);
+
+            color: var(--muted);
+
+            font-family:
+                "SFMono-Regular",
+                Consolas,
+                monospace;
+
+            font-size: 11px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+
+            flex: 0 0 auto;
+
+            margin-right: 10px;
+
+            border-radius: 50%;
+
+            background: var(--blue);
+
+            box-shadow:
+                0 0 12px currentColor;
+        }
+
+        .status-dot.online {
+            color: var(--green);
+            background: var(--green);
+        }
+
+        .status-dot.warning {
+            color: var(--orange);
+            background: var(--orange);
+        }
+
+        .status-dot.error {
+            color: var(--red);
+            background: var(--red);
+        }
+
+        .footer {
+            margin-top: 24px;
+
+            color: #56647b;
+
+            font-size: 9px;
+            text-align: center;
+
+            letter-spacing: 1px;
+        }
+
+        @media (max-width: 500px) {
+            .shell {
+                padding: 25px;
+                border-radius: 20px;
+            }
+
+            h1 {
+                font-size: 26px;
+            }
+        }
     </style>
 </head>
+
 <body>
 
-<header>
-    <div class="logo">Distro<span>Sea</span></div>
-    <div class="nav-links">Active Cluster Infrastructure</div>
-</header>
+<div class="shell">
 
-<main>
-    <div class="bg-glow"></div>
-    <div class="card">
-        <h1>AxelOS Custom</h1>
-        <p class="subtitle">Launch a native x86_64 Debian Live CD environment featuring the full KDE Plasma desktop directly in a secure container tab.</p>
-        
-        <div class="specs-grid">
-            <div class="spec-badge"><div>Arch</div><div>x86_64</div></div>
-            <div class="spec-badge"><div>Memory</div><div>5.0 GB</div></div>
-            <div class="spec-badge"><div>CPU Cores</div><div>2 vCPUs</div></div>
+    <div class="brand">
+
+        <div class="logo">
+            AX
         </div>
 
-        <button id="launch-btn" class="btn" onclick="triggerDistroSeaPipeline()">Start AxelOS</button>
-        
-        <div id="terminal-box">
-            <div id="log-line-1">> Initializing operational queue...</div>
-            <div id="log-line-2"></div>
-            <div id="log-line-3"></div>
-            <span class="cursor"></span>
+        <div>
+            <div class="brand-name">
+                AXELOS
+            </div>
+
+            <div class="brand-subtitle">
+                CLOUD DESKTOP
+            </div>
         </div>
-    </div>
-</main>
 
-<footer>
-    &copy; 2026 DistroSea Engine Infrastructure Sandbox Simulation Shell Layers.
-</footer>
-
-<div id="verify-modal" class="modal">
-    <div class="modal-box">
-        <h3>Your VM Server is Ready!</h3>
-        <p>The hypervisor node has finalized booting up AxelOS. Confirm your access authorization within the allocation time window to mount the system interface panel.</p>
-        <div class="timer-strip" id="countdown-clock">30</div>
-        <button class="confirm-btn" id="claim-btn">Enter Desktop Terminal</button>
     </div>
+
+    <h1>
+        Run AxelOS Online
+    </h1>
+
+    <p class="description">
+        Launch a temporary AxelOS x86_64 desktop directly
+        in your browser. No installation required.
+    </p>
+
+    <div class="specs">
+
+        <div class="spec">
+            <div class="spec-label">
+                Architecture
+            </div>
+
+            <div class="spec-value">
+                x86_64
+            </div>
+        </div>
+
+        <div class="spec">
+            <div class="spec-label">
+                Memory
+            </div>
+
+            <div class="spec-value">
+                4 GB
+            </div>
+        </div>
+
+        <div class="spec">
+            <div class="spec-label">
+                CPU
+            </div>
+
+            <div class="spec-value">
+                2 vCPU
+            </div>
+        </div>
+
+    </div>
+
+    <button
+        id="launch-btn"
+        onclick="launchAxelOS()"
+    >
+        Launch AxelOS
+    </button>
+
+    <div class="status">
+
+        <span
+            id="status-dot"
+            class="status-dot"
+        ></span>
+
+        <span id="status-text">
+            System ready
+        </span>
+
+    </div>
+
+    <div class="footer">
+        TEMPORARY CLOUD SESSION ï¿½ AUTOMATIC IDLE SHUTDOWN
+    </div>
+
 </div>
 
 <script>
-    let streamTracker = null;
-    let gateTimerWatcher = null;
 
-    async function triggerDistroSeaPipeline() {
-        const btn = document.getElementById('launch-btn');
-        const term = document.getElementById('terminal-box');
-        const l2 = document.getElementById('log-line-2');
-        const l3 = document.getElementById('log-line-3');
+const launchButton =
+    document.getElementById("launch-btn");
 
-        btn.disabled = true;
-        term.style.display = "block";
-        l2.innerText = "> Interrogating current active cluster node locks...";
+const statusText =
+    document.getElementById("status-text");
 
-        try {
-            // 1. Check if a VM session is ALREADY running
-            const check = await fetch('/api/status');
-            const state = await check.json();
+const statusDot =
+    document.getElementById("status-dot");
 
-            if (state.status === "ready" && state.url) {
-                l2.innerText = "> Active hot-standby runtime asset identified.";
-                l3.innerText = "> Launching user validation check sequence loops...";
-                launchVerificationGate(state.url);
+let pollTimer = null;
+
+let pollBusy = false;
+
+let pollSeconds = 0;
+
+
+function setStatus(
+    text,
+    type = ""
+) {
+    statusText.textContent = text;
+
+    statusDot.className =
+        "status-dot " + type;
+}
+
+
+async function getStatus() {
+
+    const response =
+        await fetch(
+            "/api/status?t=" + Date.now(),
+            {
+                cache: "no-store"
+            }
+        );
+
+    if (!response.ok) {
+        throw new Error(
+            "Status service unavailable"
+        );
+    }
+
+    return response.json();
+}
+
+
+async function launchAxelOS() {
+
+    if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+    }
+
+    launchButton.disabled = true;
+
+    setStatus(
+        "Checking AxelOS session...",
+        "warning"
+    );
+
+    try {
+
+        const current =
+            await getStatus();
+
+        if (
+            current.status === "ready" &&
+            current.url
+        ) {
+
+            setStatus(
+                "AxelOS is ready. Opening desktop...",
+                "online"
+            );
+
+            setTimeout(
+                () => {
+                    window.location.href =
+                        current.url;
+                },
+                350
+            );
+
+            return;
+        }
+
+
+        if (
+            current.status === "active"
+        ) {
+
+            setStatus(
+                "AxelOS is currently in use.",
+                "warning"
+            );
+
+            launchButton.disabled = false;
+
+            return;
+        }
+
+
+        if (
+            current.status === "booting"
+        ) {
+
+            beginPolling();
+
+            return;
+        }
+
+
+        const response =
+            await fetch(
+                "/api/launch",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    }
+                }
+            );
+
+        const result =
+            await response.json();
+
+
+        if (
+            !response.ok ||
+            !result.success
+        ) {
+
+            if (
+                result.status === "active"
+            ) {
+                throw new Error(
+                    "AxelOS is already in use."
+                );
+            }
+
+            if (
+                result.status === "booting"
+            ) {
+                beginPolling();
                 return;
             }
 
-            // 2. If it is offline, launch a NEW virtual machine
-            l2.innerText = "> Queue Position: 1. Provisioning bare-metal hardware cluster context...";
-            l3.innerText = "> Sending wake-up signal to GitHub runners...";
-            
-            const dispatch = await fetch('/api/launch', { method: 'POST' });
-            const verification = await dispatch.json();
-
-            if (!verification.success) {
-                throw new Error("API rejection execution exception");
-            }
-
-            // 3. Start checking session.json every 5 seconds until the VM is ready
-            let systemTickCounter = 0;
-            streamTracker = setInterval(async () => {
-                systemTickCounter++;
-                l2.innerText = `> Cloud Infrastructure Bootstrapping Processing... (${systemTickCounter * 5}s)`;
-                l3.innerText = `> Pulling 8GB axelos-amd64.iso pipeline stream data layers...`;
-                
-                try {
-                    const poll = await fetch('/api/status');
-                    const telemetry = await poll.json();
-                    
-                    if (telemetry.status === "ready" && telemetry.url) {
-                        clearInterval(streamTracker);
-                        l2.innerText = "> ISO downloaded. Kernel boot cycles completed.";
-                        l3.innerText = "> Display server initialization confirmed. Node mapping synchronized.";
-                        setTimeout(() => { launchVerificationGate(telemetry.url); }, 1000);
-                    }
-                } catch (pollErr) {
-                    // Ignore transient CDN fetching errors while GitHub Pages updates
-                    console.log("Waiting for CDN update...");
-                }
-            }, 5000);
-
-        } catch (err) {
-            l2.style.color = "#ef4444";
-            l2.innerText = "> FATAL INITIALIZATION LANE EXCEPTION.";
-            l3.innerText = "> Trigger failed. Verify your Vercel GH_PAT variable matches your GitHub token.";
-            btn.disabled = false;
+            throw new Error(
+                result.error ||
+                "Unable to launch AxelOS."
+            );
         }
+
+
+        setStatus(
+            "Provisioning AxelOS cloud desktop...",
+            "warning"
+        );
+
+        beginPolling();
+
+    } catch (error) {
+
+        console.error(error);
+
+        setStatus(
+            error.message ||
+            "Launch failed.",
+            "error"
+        );
+
+        launchButton.disabled = false;
+    }
+}
+
+
+function beginPolling() {
+
+    if (pollTimer) {
+        clearInterval(pollTimer);
     }
 
-    function launchVerificationGate(directStreamingTargetUrl) {
-        const modal = document.getElementById('verify-modal');
-        const clock = document.getElementById('countdown-clock');
-        const confirmBtn = document.getElementById('claim-btn');
-        const btn = document.getElementById('launch-btn');
-        const term = document.getElementById('terminal-box');
+    pollSeconds = 0;
 
-        modal.style.display = "flex";
-        let secondsLeft = 30;
-        clock.innerText = secondsLeft;
+    setStatus(
+        "Booting AxelOS...",
+        "warning"
+    );
 
-        gateTimerWatcher = setInterval(() => {
-            secondsLeft--;
-            clock.innerText = secondsLeft;
-            if (secondsLeft <= 0) {
-                clearInterval(gateTimerWatcher);
-                modal.style.display = "none";
-                term.style.display = "none";
-                btn.disabled = false;
-                alert("Verification threshold timeout limit expired.");
-            }
-        }, 1000);
+    pollTimer =
+        setInterval(
+            pollSession,
+            3000
+        );
 
-        confirmBtn.onclick = () => {
-            clearInterval(gateTimerWatcher);
-            modal.style.display = "none";
-            term.style.display = "none";
-            btn.disabled = false;
-            document.getElementById('status-box').innerText = "Status: Connected";
-            
-            // FIXED: If user is on HTTPS, we warn them to use HTTP or force the raw protocol bridge
-            let targetUrl = directStreamingTargetUrl;
-            if (window.location.protocol === 'https:') {
-                // We point the target link to open over http so the raw TCP VNC socket stream can connect natively!
-                targetUrl = directStreamingTargetUrl.replace('http://', 'http://');
-                alert("Browser Security Notice: To stream pixels cleanly over raw TCP tunnels, ensure you click 'Allow Insecure Content' or use the HTTP version of this website link if the tab loads up empty.");
-            }
-            
-            window.open(targetUrl, '_blank');
-        };
+    pollSession();
+}
+
+
+async function pollSession() {
+
+    if (pollBusy) {
+        return;
     }
+
+    pollBusy = true;
+
+    pollSeconds += 3;
+
+    try {
+
+        const state =
+            await getStatus();
+
+
+        if (
+            state.status === "ready" &&
+            state.url
+        ) {
+
+            clearInterval(
+                pollTimer
+            );
+
+            pollTimer = null;
+
+            setStatus(
+                "AxelOS ready. Opening desktop...",
+                "online"
+            );
+
+            setTimeout(
+                () => {
+                    window.location.href =
+                        state.url;
+                },
+                500
+            );
+
+            return;
+        }
+
+
+        if (
+            state.status === "active"
+        ) {
+
+            clearInterval(
+                pollTimer
+            );
+
+            pollTimer = null;
+
+            setStatus(
+                "AxelOS is already in use.",
+                "warning"
+            );
+
+            launchButton.disabled = false;
+
+            return;
+        }
+
+
+        if (
+            state.status === "booting"
+        ) {
+
+            setStatus(
+                `Starting AxelOS... ${pollSeconds}s`,
+                "warning"
+            );
+
+        } else {
+
+            clearInterval(
+                pollTimer
+            );
+
+            pollTimer = null;
+
+            setStatus(
+                "Session ended. Try again.",
+                "error"
+            );
+
+            launchButton.disabled = false;
+        }
+
+
+        if (pollSeconds >= 300) {
+
+            clearInterval(
+                pollTimer
+            );
+
+            pollTimer = null;
+
+            setStatus(
+                "Boot timeout. Please try again.",
+                "error"
+            );
+
+            launchButton.disabled = false;
+        }
+
+    } catch (error) {
+
+        console.warn(
+            "Polling error:",
+            error
+        );
+
+    } finally {
+
+        pollBusy = false;
+    }
+}
 
 </script>
 
-
 </body>
-</html>
+</htm
